@@ -1,6 +1,3 @@
-
-
-```md
 # Custom DSLPIDControl (RL-Tuned Version)
 
 This repository contains a **modified and extended version** of the original `DSLPIDControl` controller from  
@@ -92,21 +89,19 @@ This controller remains **strictly PD** (no integral), matching both course requ
 ### ✔ Attitude Error on SO(3)
 Uses:
 
-```
-
 e_R = 0.5 * vee(R_d^T * R - R^T * R_d)
 e_omega = ω − R^T * R_d * ω_d
 
-```
+shell
+Copy code
 
 ### ✔ Desired Rotation Derived from Thrust Vector
-
-```
 
 T_d = m * (g * e3 + desired_acc)
 z_B_d = T_d / ||T_d||
 
-````
+yaml
+Copy code
 
 Special handling avoids alignment singularities.
 
@@ -142,13 +137,9 @@ This implementation is an extension of:
       pages={7512-7519},
       doi={10.1109/IROS51168.2021.9635857}
 }
-````
-
----
-
-## 🧪 Example Usage
-
-```python
+🧪 Example Usage
+python
+Copy code
 from gym_pybullet_drones.control.DSLPIDControl import DSLPIDControl
 from gym_pybullet_drones.utils.enums import DroneModel
 import numpy as np
@@ -167,27 +158,24 @@ rpm, pos_error, att_error = ctrl.computeControl(
 print("Motor RPM:", rpm)
 print("Position Error:", pos_error)
 print("Attitude Error:", att_error)
-```
+📜 File Summary
+DSLPIDControl.py
 
----
+Contains default RL-tuned gains
 
-## 📜 File Summary
+Contains original manually tuned gains (commented)
 
-* **`DSLPIDControl.py`**
+Implements cascaded PD control
 
-  * Contains default RL-tuned gains
-  * Contains original manually tuned gains (commented)
-  * Implements cascaded PD control
-  * Includes gravity compensation, mixer, torque limits, etc.
-  * Preserves all original author notes
+Includes gravity compensation, mixer, torque limits, etc.
 
----
+Preserves all original author notes
 
-## 💡 Optional Future Additions
+💡 Optional Future Additions
+Add integral corrections for trajectory tracking
 
-* Add integral corrections for trajectory tracking
-* Add trajectory-smoothing spline input
-* Add wind/drag disturbance models
-* Add domain-randomized RL retuning
+Add trajectory-smoothing spline input
 
----
+Add wind/drag disturbance models
+
+Add domain-randomized RL retuning
