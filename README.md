@@ -1,13 +1,13 @@
 # Custom DSLPIDControl (RL-Tuned Version)
 
 This repository contains a **modified and extended version** of the original `DSLPIDControl` controller from  
-👉 **https://github.com/utiasDSL/gym-pybullet-drones**
+ **https://github.com/utiasDSL/gym-pybullet-drones**
 
 Our version introduces **Reinforcement-Learning–tuned gains**, improved structure, preserved author notes, and clearly documented control constraints.
 
 ---
 
-## 📌 Overview
+##  Overview
 
 `DSLPIDControl` implements a **cascaded PD controller** for Crazyflie 2.x drones:
 
@@ -27,7 +27,7 @@ Our version introduces **Reinforcement-Learning–tuned gains**, improved struct
 
 ---
 
-## 🚀 Modifications in This Fork
+##  Modifications in This Fork
 
 ### **1️⃣ Reinforcement Learning–Tuned Gains**
 
@@ -107,7 +107,7 @@ Special handling avoids alignment singularities.
 
 ---
 
-## 🧬 RL-Tuned Gains (Default)
+## RL-Tuned Gains (Default)
 
 | Loop | Gain Type | Values |
 |------|-----------|--------|
@@ -120,11 +120,11 @@ Earlier manual gains + RL search logs remain commented in the control file.
 
 ---
 
-## 📎 Original Repository (Fork Source)
+##  Original Repository (Fork Source)
 
 This implementation is an extension of:
 
-👉 **https://github.com/utiasDSL/gym-pybullet-drones**
+ **https://github.com/utiasDSL/gym-pybullet-drones**
 
 ### Please cite if used academically:
 
@@ -137,7 +137,7 @@ This implementation is an extension of:
       pages={7512-7519},
       doi={10.1109/IROS51168.2021.9635857}
 }
-🧪 Example Usage
+Example Usage
 python
 Copy code
 from gym_pybullet_drones.control.DSLPIDControl import DSLPIDControl
@@ -158,7 +158,7 @@ rpm, pos_error, att_error = ctrl.computeControl(
 print("Motor RPM:", rpm)
 print("Position Error:", pos_error)
 print("Attitude Error:", att_error)
-📜 File Summary
+ File Summary
 DSLPIDControl.py
 
 Contains default RL-tuned gains
@@ -171,7 +171,7 @@ Includes gravity compensation, mixer, torque limits, etc.
 
 Preserves all original author notes
 
-💡 Optional Future Additions
+Optional Future Additions
 Add integral corrections for trajectory tracking
 
 Add trajectory-smoothing spline input
