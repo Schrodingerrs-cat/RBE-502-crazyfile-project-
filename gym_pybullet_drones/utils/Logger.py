@@ -64,6 +64,18 @@ class Logger(object):
                                                                                                   # rpm1,
                                                                                                   # rpm2,
                                                                                                   # rpm3
+        self.des_states = np.zeros((num_drones,12,duration_sec*self.LOGGING_FREQ_HZ)) #### 12 states: pos_x,
+                                                                                                    # pos_y,
+                                                                                                    # pos_z,
+                                                                                                    # vel_x,
+                                                                                                    # vel_y,
+                                                                                                    # vel_z,
+                                                                                                    # roll,
+                                                                                                    # pitch,
+                                                                                                    # yaw,
+                                                                                                    # ang_vel_x,
+                                                                                                    # ang_vel_y,
+                                                                                                    # ang_vel_z
         #### Note: this is the suggest information to log ##############################
         self.controls = np.zeros((num_drones, 12, duration_sec*self.LOGGING_FREQ_HZ)) #### 12 control targets: pos_x,
                                                                                                              # pos_y,
@@ -80,10 +92,49 @@ class Logger(object):
 
     ################################################################################
 
+    # def log(self,
+    #         drone: int,
+    #         timestamp,
+    #         state,
+    #         control=np.zeros(12)
+    #         ):
+    #     """Logs entries for a single simulation step, of a single drone.
+
+    #     Parameters
+    #     ----------
+    #     drone : int
+    #         Id of the drone associated to the log entry.
+    #     timestamp : float
+    #         Timestamp of the log in simulation clock.
+    #     state : ndarray
+    #         (20,)-shaped array of floats containing the drone's state.
+    #     control : ndarray, optional
+    #         (12,)-shaped array of floats containing the drone's control target.
+
+    #     """
+    #     if drone < 0 or drone >= self.NUM_DRONES or timestamp < 0 or len(state) != 20 or len(control) != 12:
+    #         print("[ERROR] in Logger.log(), invalid data")
+    #     current_counter = int(self.counters[drone])
+    #     #### Add rows to the matrices if a counter exceeds their size
+    #     if current_counter >= self.timestamps.shape[1]:
+    #         self.timestamps = np.concatenate((self.timestamps, np.zeros((self.NUM_DRONES, 1))), axis=1)
+    #         self.states = np.concatenate((self.states, np.zeros((self.NUM_DRONES, 16, 1))), axis=2)
+    #         self.controls = np.concatenate((self.controls, np.zeros((self.NUM_DRONES, 12, 1))), axis=2)
+    #     #### Advance a counter is the matrices have overgrown it ###
+    #     elif not self.PREALLOCATED_ARRAYS and self.timestamps.shape[1] > current_counter:
+    #         current_counter = self.timestamps.shape[1]-1
+    #     #### Log the information and increase the counter ##########
+    #     self.timestamps[drone, current_counter] = timestamp
+    #     #### Re-order the kinematic obs (of most Aviaries) #########
+    #     self.states[drone, :, current_counter] = np.hstack([state[0:3], state[10:13], state[7:10], state[13:20]])
+    #     self.controls[drone, :, current_counter] = control
+    #     self.counters[drone] = current_counter + 1
+
     def log(self,
             drone: int,
             timestamp,
             state,
+            des_state,
             control=np.zeros(12)
             ):
         """Logs entries for a single simulation step, of a single drone.
@@ -96,6 +147,8 @@ class Logger(object):
             Timestamp of the log in simulation clock.
         state : ndarray
             (20,)-shaped array of floats containing the drone's state.
+        des_state : ndarray
+            (12,)-shaped array of floats containing the drone's desired statec[pos, vel, rpy, omega].
         control : ndarray, optional
             (12,)-shaped array of floats containing the drone's control target.
 
@@ -107,6 +160,7 @@ class Logger(object):
         if current_counter >= self.timestamps.shape[1]:
             self.timestamps = np.concatenate((self.timestamps, np.zeros((self.NUM_DRONES, 1))), axis=1)
             self.states = np.concatenate((self.states, np.zeros((self.NUM_DRONES, 16, 1))), axis=2)
+            self.des_states = np.concatenate((self.des_states, np.zeros((self.NUM_DRONES, 12, 1))), axis=2)
             self.controls = np.concatenate((self.controls, np.zeros((self.NUM_DRONES, 12, 1))), axis=2)
         #### Advance a counter is the matrices have overgrown it ###
         elif not self.PREALLOCATED_ARRAYS and self.timestamps.shape[1] > current_counter:
@@ -115,6 +169,7 @@ class Logger(object):
         self.timestamps[drone, current_counter] = timestamp
         #### Re-order the kinematic obs (of most Aviaries) #########
         self.states[drone, :, current_counter] = np.hstack([state[0:3], state[10:13], state[7:10], state[13:20]])
+        self.des_states[drone, :, current_counter] = des_state
         self.controls[drone, :, current_counter] = control
         self.counters[drone] = current_counter + 1
 
@@ -223,18 +278,21 @@ class Logger(object):
         row = 0
         for j in range(self.NUM_DRONES):
             axs[row, col].plot(t, self.states[j, 0, :], label="drone_"+str(j))
+            axs[row, col].plot(t, self.des_states[j, 0, :])
         axs[row, col].set_xlabel('time')
         axs[row, col].set_ylabel('x (m)')
 
         row = 1
         for j in range(self.NUM_DRONES):
             axs[row, col].plot(t, self.states[j, 1, :], label="drone_"+str(j))
+            axs[row, col].plot(t, self.des_states[j, 1, :])
         axs[row, col].set_xlabel('time')
         axs[row, col].set_ylabel('y (m)')
 
         row = 2
         for j in range(self.NUM_DRONES):
             axs[row, col].plot(t, self.states[j, 2, :], label="drone_"+str(j))
+            axs[row, col].plot(t, self.des_states[j, 2, :])
         axs[row, col].set_xlabel('time')
         axs[row, col].set_ylabel('z (m)')
 
@@ -242,16 +300,19 @@ class Logger(object):
         row = 3
         for j in range(self.NUM_DRONES):
             axs[row, col].plot(t, self.states[j, 6, :], label="drone_"+str(j))
+            axs[row, col].plot(t, self.des_states[j, 6, :])
         axs[row, col].set_xlabel('time')
         axs[row, col].set_ylabel('r (rad)')
         row = 4
         for j in range(self.NUM_DRONES):
             axs[row, col].plot(t, self.states[j, 7, :], label="drone_"+str(j))
+            axs[row, col].plot(t, self.des_states[j, 7, :])
         axs[row, col].set_xlabel('time')
         axs[row, col].set_ylabel('p (rad)')
         row = 5
         for j in range(self.NUM_DRONES):
             axs[row, col].plot(t, self.states[j, 8, :], label="drone_"+str(j))
+            axs[row, col].plot(t, self.des_states[j, 8, :])
         axs[row, col].set_xlabel('time')
         axs[row, col].set_ylabel('y (rad)')
 
@@ -259,16 +320,19 @@ class Logger(object):
         row = 6
         for j in range(self.NUM_DRONES):
             axs[row, col].plot(t, self.states[j, 9, :], label="drone_"+str(j))
+            axs[row, col].plot(t, self.des_states[j, 9, :])
         axs[row, col].set_xlabel('time')
         axs[row, col].set_ylabel('wx')
         row = 7
         for j in range(self.NUM_DRONES):
             axs[row, col].plot(t, self.states[j, 10, :], label="drone_"+str(j))
+            axs[row, col].plot(t, self.des_states[j, 10, :])
         axs[row, col].set_xlabel('time')
         axs[row, col].set_ylabel('wy')
         row = 8
         for j in range(self.NUM_DRONES):
             axs[row, col].plot(t, self.states[j, 11, :], label="drone_"+str(j))
+            axs[row, col].plot(t, self.des_states[j, 11, :])
         axs[row, col].set_xlabel('time')
         axs[row, col].set_ylabel('wz')
 
@@ -285,16 +349,19 @@ class Logger(object):
         row = 0
         for j in range(self.NUM_DRONES):
             axs[row, col].plot(t, self.states[j, 3, :], label="drone_"+str(j))
+            axs[row, col].plot(t, self.des_states[j, 3, :])
         axs[row, col].set_xlabel('time')
         axs[row, col].set_ylabel('vx (m/s)')
         row = 1
         for j in range(self.NUM_DRONES):
             axs[row, col].plot(t, self.states[j, 4, :], label="drone_"+str(j))
+            axs[row, col].plot(t, self.des_states[j, 4, :])
         axs[row, col].set_xlabel('time')
         axs[row, col].set_ylabel('vy (m/s)')
         row = 2
         for j in range(self.NUM_DRONES):
             axs[row, col].plot(t, self.states[j, 5, :], label="drone_"+str(j))
+            axs[row, col].plot(t, self.des_states[j, 5, :])
         axs[row, col].set_xlabel('time')
         axs[row, col].set_ylabel('vz (m/s)')
 
@@ -303,18 +370,21 @@ class Logger(object):
         for j in range(self.NUM_DRONES):
             rdot = np.hstack([0, (self.states[j, 6, 1:] - self.states[j, 6, 0:-1]) * self.LOGGING_FREQ_HZ ])
             axs[row, col].plot(t, rdot, label="drone_"+str(j))
+            axs[row, col].plot(t, self.des_states[j,6,:])
         axs[row, col].set_xlabel('time')
         axs[row, col].set_ylabel('rdot (rad/s)')
         row = 4
         for j in range(self.NUM_DRONES):
             pdot = np.hstack([0, (self.states[j, 7, 1:] - self.states[j, 7, 0:-1]) * self.LOGGING_FREQ_HZ ])
             axs[row, col].plot(t, pdot, label="drone_"+str(j))
+            axs[row, col].plot(t, self.des_states[j,7,:])
         axs[row, col].set_xlabel('time')
         axs[row, col].set_ylabel('pdot (rad/s)')
         row = 5
         for j in range(self.NUM_DRONES):
             ydot = np.hstack([0, (self.states[j, 8, 1:] - self.states[j, 8, 0:-1]) * self.LOGGING_FREQ_HZ ])
             axs[row, col].plot(t, ydot, label="drone_"+str(j))
+            axs[row, col].plot(t, self.des_states[j,8,:])
         axs[row, col].set_xlabel('time')
         axs[row, col].set_ylabel('ydot (rad/s)')
 

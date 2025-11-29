@@ -192,7 +192,6 @@ class DSLPIDControl(BaseControl):
 
         """
         self.control_counter += 1
-<<<<<<< HEAD
         mass = self._getURDFParameter("m")
 
         # OUTER LOOP: position → thrust vector T_d, desired R_d
@@ -227,28 +226,6 @@ class DSLPIDControl(BaseControl):
             computed_target_rpy,
             target_rpy_rates,
         )
-=======
-        mass = self._getURDFParameter('m')
-        target_thrust, computed_target_rpy, pos_e, cur_rotation = self._dslPIDPositionControl(control_timestep,
-                                                                         cur_pos,
-                                                                         cur_quat,
-                                                                         cur_vel,
-                                                                         target_pos,
-                                                                         target_rpy,
-                                                                         target_vel,
-                                                                         target_acc,
-                                                                         mass=mass
-                                                                         )
-        scalar_thrust = max(0., np.dot(target_thrust, cur_rotation[:,2]))
-        thrust = (math.sqrt(scalar_thrust / (4*self.KF)) - self.PWM2RPM_CONST) / self.PWM2RPM_SCALE
-        rpm = self._dslPIDAttitudeControl(control_timestep,
-                                          thrust,
-                                          cur_quat,
-                                          cur_ang_vel,
-                                          computed_target_rpy,
-                                          target_rpy_rates
-                                          )
->>>>>>> 4011dd6c5a3542c6cb85182ab025207403d585e6
 
         return rpm, pos_e, computed_target_rpy
 
